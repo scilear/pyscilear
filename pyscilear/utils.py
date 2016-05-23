@@ -2,11 +2,12 @@ import os
 import pickle
 
 from datetime import datetime
-from logbook import info, FileHandler, error, warn
+from logbook import info, FileHandler, StreamHandler, error, warn
 
 def initialise_logging(file_name=None, stderr=True):
     if file_name == None:
         file_name = 'python_log'
+    StreamHandler(sys.stdout).push_application()
     if os.path.exists(r'/var/log/'):
         log_handler = FileHandler('/var/log/' + file_name + '_'
                                   + datetime.now().isoformat().replace(':', '-') + '.log', bubble=True)

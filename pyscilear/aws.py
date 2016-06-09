@@ -36,7 +36,7 @@ def execute_query(sql_query):
     cur.execute(sql_query)
     conn.commit()
 
-def execute_scalar(sql_query, data):
+def execute_scalar(sql_query, data=None):
     conn = get_redshift_connection()
     cur = conn.cursor()
     debug(sql_query)
@@ -44,7 +44,7 @@ def execute_scalar(sql_query, data):
     results = cur.fetchone()
     return results
 
-def execute_cursor(sql_query, data):
+def execute_cursor(sql_query, data=None):
     conn = get_redshift_connection()
     cur = conn.cursor()
     debug(sql_query)

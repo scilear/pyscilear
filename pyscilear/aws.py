@@ -13,7 +13,7 @@ def get_access_keys():
     debug(ak)
     return S3_ACCESS_KEY, S3_SECRET_KEY
 
-def get_db__access():
+def get_db_access():
     ak = pd.read_csv('db_access')
     db_name = ak.values[0][0]
     db_user = ak.values[0][1]
@@ -23,7 +23,7 @@ def get_db__access():
     return db_name, db_user, db_password, db_host
 
 def get_redshift_connection():
-    db, user, pwd, host = get_db__access()
+    db, user, pwd, host = get_db_access()
     conn_string = "dbname='%s' port='5439' user='%s' password='%s' host='%s'" %(db, user, pwd, host);
     debug(conn_string)
     conn = psycopg2.connect(conn_string)

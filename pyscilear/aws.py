@@ -8,10 +8,16 @@ from logbook import info, debug
 
 
 def get_access_keys():
-    ak = pd.read_csv('access_keys')
-    S3_ACCESS_KEY = ak.values[0][0]
-    S3_SECRET_KEY = ak.values[0][1]
-    debug(ak)
+    S3_ACCESS_KEY = ''
+    S3_SECRET_KEY = ''
+    if os.path.exists('access_keys'):
+        ak = pd.read_csv('access_keys')
+        S3_ACCESS_KEY = ak.values[0][0]
+        S3_SECRET_KEY = ak.values[0][1]
+        debug(ak)
+    else:
+        S3_ACCESS_KEY = os.environ['S3_ACCESS_KEY']
+        S3_SECRET_KEY = os.environ['S3_SECRET_KEY']
     return S3_ACCESS_KEY, S3_SECRET_KEY
 
 

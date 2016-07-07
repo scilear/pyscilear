@@ -26,7 +26,7 @@ def execute_scalar(sql_query, data=None):
     if data is None:
         cur.execute(sql_query)
     else:
-        cur.execute(sql_query % data)
+        cur.execute(sql_query, data)
     results = cur.fetchone()
     return results
 
@@ -37,7 +37,7 @@ def execute_cursor(sql_query, data=None):
     if data is None:
         cur.execute(sql_query)
     else:
-        cur.execute(sql_query % data)
+        cur.execute(sql_query, data)
     results = cur.fetchall()
     return results
 

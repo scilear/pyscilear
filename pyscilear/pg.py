@@ -20,7 +20,7 @@ def get_db_access():
         db_host = ak.values[0][3]
         debug(ak)
     else:
-        db_name = os.environ['PG_DB']
+        db_name = os.environ['PG_NAME']
         db_user = os.environ['PG_USER']
         db_password = os.environ['PG_PASSWORD']
         db_host = os.environ['PG_HOST']

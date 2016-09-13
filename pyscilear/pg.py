@@ -35,11 +35,11 @@ def get_pg_connection():
     return conn
 
 
-def execute_query(sql_query):
+def execute_query(sql_query, data=None):
     conn = get_pg_connection()
     cur = conn.cursor()
     debug(sql_query)
-    cur.execute(sql_query)
+    cur.execute(sql_query, data)
     conn.commit()
 
 

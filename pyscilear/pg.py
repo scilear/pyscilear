@@ -48,6 +48,7 @@ def execute_scalar(sql_query, data=None):
     cur = conn.cursor()
     debug(sql_query)
     cur.execute(sql_query, data)
+    conn.commit() # needed when we return the id of an insert for instance
     results = cur.fetchone()
     return results
 

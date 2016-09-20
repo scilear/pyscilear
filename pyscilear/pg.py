@@ -48,7 +48,7 @@ def execute_scalar(sql_query, data=None):
     cur = conn.cursor()
     debug(sql_query)
     cur.execute(sql_query, data)
-    conn.commit() # needed when we return the id of an insert for instance
+    conn.commit()  # needed when we return the id of an insert for instance
     results = cur.fetchone()
     return results
 
@@ -58,8 +58,18 @@ def execute_cursor(sql_query, data=None):
     cur = conn.cursor()
     debug(sql_query)
     cur.execute(sql_query, data)
+    conn.commit()  # needed when we return the id of an insert for instance
     results = cur.fetchall()
     return results
+
+
+def execute_named_cursor(sql_query, cursor_name, data=None):
+    conn = get_pg_connection()
+    cur = conn.cursor()
+    cur.execute(sql_query)
+    named_cursor = conn.cursor(name=cursor_name)
+    rows = named_cursor.fetchall()
+    return rows
 
 
 if __name__ == "__main__":

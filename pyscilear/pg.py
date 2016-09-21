@@ -4,6 +4,7 @@ import pandas as pd
 import psycopg2
 from logbook import info, debug
 from sqlalchemy import create_engine
+from upsert import Upsert
 
 
 def get_sqalchemy_engine():
@@ -70,6 +71,13 @@ def execute_named_cursor(sql_query, cursor_name, data=None):
     named_cursor = conn.cursor(name=cursor_name)
     rows = named_cursor.fetchall()
     return rows
+
+
+def get_upsert(table):
+    conn = get_pg_connection()
+    cur = conn.cursor()
+    upsert = Upsert(cur, table)
+    return upsert
 
 
 if __name__ == "__main__":

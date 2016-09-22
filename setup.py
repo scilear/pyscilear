@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='pyscilear',
-      version='0.9',
+      version='1.0',
       description='scilear utiities',
       url='https://github.com/scilear/pyscilear.git',
       author='Scilear',

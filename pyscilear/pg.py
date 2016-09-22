@@ -64,12 +64,11 @@ def execute_cursor(sql_query, data=None):
     return results
 
 
-def execute_named_cursor(sql_query, cursor_name, data=None):
+def execute_cursor_function(function_name, data=None):
     conn = get_pg_connection()
     cur = conn.cursor()
-    cur.execute(sql_query)
-    named_cursor = conn.cursor(name=cursor_name)
-    rows = named_cursor.fetchall()
+    cur.callproc(function_name, data)
+    rows = cur.fetchall()
     return rows
 
 
@@ -81,5 +80,13 @@ def get_upsert(table):
 
 
 if __name__ == "__main__":
-    res = execute_cursor('select * from daily_data limit 10')
-    print res
+    # res = execute_cursor('select * from daily_data limit 10')
+    # print res
+
+    conn = get_pg_connection()
+    cur = conn.cursor()
+    cur.callproc("get_pending_jobs", ('news_sent', 10))
+
+    #named_cursor = conn.cursor(name='cursor_x')
+    for row in cur:
+        print row

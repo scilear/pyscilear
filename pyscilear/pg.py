@@ -68,6 +68,7 @@ def execute_cursor_function(function_name, data=None):
     conn = get_pg_connection()
     cur = conn.cursor()
     cur.callproc(function_name, data)
+    conn.commit()
     rows = cur.fetchall()
     return rows
 

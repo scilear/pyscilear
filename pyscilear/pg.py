@@ -38,19 +38,21 @@ def log_error(function_name, what, exception_str):
 
 def rollback(reset=False):
     global PG_CONNECTION
-    PG_CONNECTION.rollback()
-    if reset:
-        try:
-            PG_CONNECTION.close()
-        except Exception, e:
-            error('%s - error on connection close - %s' % (__name__, str(e)))
-        finally:
-            PG_CONNECTION = None
+    if PG_CONNECTION is not None:
+        PG_CONNECTION.rollback()
+        if reset:
+            try:
+                PG_CONNECTION.close()
+            except Exception, e:
+                error('%s - error on connection close - %s' % (__name__, str(e)))
+            finally:
+                PG_CONNECTION = None
 
 
 def commit():
     global PG_CONNECTION
-    PG_CONNECTION.commit()
+    if PG_CONNECTION is not None:
+        PG_CONNECTION.commit()
 
 
 def get_pg_connection():

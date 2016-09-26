@@ -40,6 +40,8 @@ def rollback(reset=False):
     global PG_CONNECTION
     if PG_CONNECTION is not None:
         PG_CONNECTION.rollback()
+        global UPSERTERS
+        UPSERTERS = dict()
         if reset:
             try:
                 PG_CONNECTION.close()
@@ -51,7 +53,7 @@ def rollback(reset=False):
 
 def commit():
     global PG_CONNECTION
-    if PG_CONNECTION is not None:
+    if PG_CONNECTION is not None and PG_CONNECTION.closed != 0:
         PG_CONNECTION.commit()
 
 
@@ -78,7 +80,6 @@ def execute_query(sql_query, data=None):
         log_error(__name__, sql_query, str(e))
 
 
-
 def execute_scalar(sql_query, data=None):
     try:
         conn = get_pg_connection()
@@ -90,7 +91,6 @@ def execute_scalar(sql_query, data=None):
         return results
     except Exception, e:
         log_error(__name__, sql_query, str(e))
-
 
 
 def execute_cursor(sql_query, data=None):
@@ -106,7 +106,6 @@ def execute_cursor(sql_query, data=None):
         log_error(__name__, sql_query, str(e))
 
 
-
 def execute_cursor_function(function_name, data=None):
     try:
         conn = get_pg_connection()
@@ -119,14 +118,26 @@ def execute_cursor_function(function_name, data=None):
         log_error(__name__, function_name, str(e))
 
 
-def get_upsert(table):
+UPSERTERS = dict()
+
+
+def upsert(table, reset=False):
+    global UPSERTERS
     try:
-        conn = get_pg_connection()
-        cur = conn.cursor()
-        upsert = Upsert(cur, table)
+        if reset or not UPSERTERS.has_key(table):
+            conn = get_pg_connection()
+            cur = conn.cursor()
+            upsert = Upsert(cur, table)
+            UPSERTERS[table] = upsert
+        else:
+            upsert = UPSERTERS[table]
+            if upsert.cursor.closed != 0 or upsert.cursor.connection.closed != 0 or upsert is None:
+                return upsert(table, True)
+        assert(isinstance(upsert, Upsert))
         return upsert
     except Exception, e:
         log_error(__name__, table, str(e))
+        return None
 
 
 if __name__ == "__main__":

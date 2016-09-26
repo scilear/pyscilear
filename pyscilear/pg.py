@@ -1,5 +1,4 @@
 import os
-
 import pandas as pd
 import psycopg2
 from logbook import info, debug, error

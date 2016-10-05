@@ -139,10 +139,22 @@ def upsert(table, reset=False):
         return None
 
 
+def query_to_file(query, file_name):
+    conn = get_pg_connection()
+    cur = conn.cursor()
+    outputquery = "COPY ({0}) TO STDOUT WITH CSV HEADER".format(query)
+    with open(file_name, 'w') as f:
+        cur.copy_expert(outputquery, f)
+    conn.commit()
+
 if __name__ == "__main__":
     # res = execute_cursor('select * from daily_data limit 10')
     # print res
 
+    large_query = "select * from daily_ema_dataset limit 1000000"
+    query_to_file(large_query, 'large_query.csv')
+
+    """
     conn = get_pg_connection()
     cur = conn.cursor()
     cur.callproc("get_pending_jobs", ('news_sent', 10))
@@ -150,3 +162,4 @@ if __name__ == "__main__":
     # named_cursor = conn.cursor(name='cursor_x')
     for row in cur:
         print row
+    """

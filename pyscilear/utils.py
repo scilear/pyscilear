@@ -3,6 +3,9 @@ import pickle
 import sys
 
 from datetime import datetime
+import time
+
+from logbook import Logger
 from logbook import info, FileHandler, StreamHandler, error, warn
 
 
@@ -20,6 +23,24 @@ def initialise_logging(file_name=None, stderr=True):
 
     log_handler.push_application()
 
+
+def func_log():
+    def decorator_func(func):
+        def wrapper_func(*args, **kwargs):
+            logger = Logger(args[0].__class__.__name__)
+            logger.debug('+%s' % func.func_name)
+            start_time = time.time()
+
+            # Invoke the wrapped function first
+            retval = func(*args, **kwargs)
+
+            elapsed_time = time.time() - start_time
+            logger.debug('-%s - elasped %f s' % (func.func_name, elapsed_time))
+            return retval
+
+        return wrapper_func
+
+    return decorator_func
 
 def serialize(obj, file_name):
     s = pickle.dumps(obj)

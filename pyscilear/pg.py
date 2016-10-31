@@ -132,7 +132,7 @@ def upsert(table, reset=False):
             upsert = UPSERTERS[table]
             if upsert.cursor.closed != 0 or upsert.cursor.connection.closed != 0 or upsert is None:
                 return upsert(table, True)
-        assert(isinstance(upsert, Upsert))
+        assert (isinstance(upsert, Upsert))
         return upsert
     except Exception, e:
         log_error(__name__, table, str(e))
@@ -147,12 +147,31 @@ def query_to_file(query, file_name):
         cur.copy_expert(outputquery, f)
     conn.commit()
 
+
+def file_to_table(table, file_name):
+    conn = get_pg_connection()
+    cur = conn.cursor()
+    outputquery = "COPY %s FROM stdin WITH CSV HEADER DELIMITER as ',' " % table
+    with open(file_name, 'r') as f:
+        cur.copy_expert(outputquery, f)
+
+    f.close()
+    conn.commit()
+
+
 if __name__ == "__main__":
     # res = execute_cursor('select * from daily_data limit 10')
     # print res
 
-    large_query = "select * from daily_ema_dataset limit 1000000"
-    query_to_file(large_query, 'large_query.csv')
+    # large_query = "select * from daily_ema_dataset limit 1000000"
+    # query_to_file(large_query, 'large_query.csv')
+
+    filename = 'test_queries.csv'
+    query_to_file('select * from daily_data limit 100', filename)
+    execute_query('create table test_pyscilear as select * from daily_data where 1=2')
+    file_to_table('test_pyscilear', filename)
+    print(execute_scalar('select count(*) from test_pyscilear')[0])
+    execute_query('drop table test_pyscilear')
 
     """
     conn = get_pg_connection()

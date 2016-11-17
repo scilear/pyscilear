@@ -42,6 +42,7 @@ def func_log():
 
     return decorator_func
 
+
 def serialize(obj, file_name):
     s = pickle.dumps(obj)
     with open(file_name, 'wb') as pkl_file:
@@ -56,3 +57,16 @@ def deserialize(file_name):
             obj = pickle.loads(s)
             return obj
     return None
+
+
+def daterange(start_date, end_date):
+    for n in range(int((end_date - start_date).days)):
+        yield start_date + timedelta(n)
+
+
+def daterange_weekdays(start_date, end_date):
+    for n in range(int((end_date - start_date).days)):
+        new_date = start_date + timedelta(n)
+        if new_date.weekday() >= 5:
+            continue
+        yield new_date

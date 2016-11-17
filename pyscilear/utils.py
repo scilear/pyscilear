@@ -27,7 +27,10 @@ def initialise_logging(file_name=None, stderr=True):
 def func_log():
     def decorator_func(func):
         def wrapper_func(*args, **kwargs):
-            logger = Logger(args[0].__class__.__name__)
+            if len(args) > 0:
+                logger = Logger(args[0].__class__.__name__)
+            else:
+                logger = Logger(func.func_name)
             logger.debug('+%s' % func.func_name)
             start_time = time.time()
 

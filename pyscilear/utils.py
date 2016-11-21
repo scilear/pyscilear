@@ -1,5 +1,6 @@
 import os
 import pickle
+import json
 import sys
 
 from datetime import datetime
@@ -46,19 +47,29 @@ def func_log():
     return decorator_func
 
 
-def serialize(obj, file_name):
-    s = pickle.dumps(obj)
-    with open(file_name, 'wb') as pkl_file:
-        pkl_file.write(s)
-        info('saved %s' % file_name)
+def serialize(obj, file_name, format='pickle'):
+    if format == 'pickle':
+        s = pickle.dumps(obj)
+        with open(file_name, 'wb') as pkl_file:
+            pkl_file.write(s)
+    elif format == 'json':
+        with open(file_name, 'w') as f:
+            json.dump(obj, f)
+    info('saved %s' % file_name)
 
 
-def deserialize(file_name):
-    if os.path.exists(file_name):
-        with open(file_name, 'rb') as pkl_file:
-            s = pkl_file.read()
-            obj = pickle.loads(s)
-            return obj
+def deserialize(file_name, format='pickle'):
+    if format == 'pickle':
+        if os.path.exists(file_name):
+            with open(file_name, 'rb') as pkl_file:
+                s = pkl_file.read()
+                obj = pickle.loads(s)
+                return obj
+    elif format == 'json':
+        if os.path.exists(file_name):
+            with open(file_name, 'rb') as f:
+                obj = json.load(f)
+                return obj
     return None
 
 
@@ -73,3 +84,4 @@ def daterange_weekdays(start_date, end_date):
         if new_date.weekday() >= 5:
             continue
         yield new_date
+

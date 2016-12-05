@@ -96,7 +96,7 @@ def execute_cursor(sql_query, data=None):
     try:
         conn = get_pg_connection()
         cur = conn.cursor()
-        debug(sql_query)
+        debug('%s --params-- %s' % (sql_query, data))
         cur.execute(sql_query, data)
         conn.commit()  # needed when we return the id of an insert for instance
         results = cur.fetchall()

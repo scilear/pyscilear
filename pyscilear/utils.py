@@ -46,18 +46,19 @@ def func_log():
 
     return decorator_func
 
-
+@func_log()
 def serialize(obj, file_name, format='pickle'):
     if format == 'pickle':
         s = pickle.dumps(obj)
         with open(file_name, 'wb') as pkl_file:
             pkl_file.write(s)
     elif format == 'json':
-        with open(file_name, 'w') as f:
+        with open(file_name, 'w', -1) as f:
             json.dump(obj, f)
     info('saved %s' % file_name)
 
 
+@func_log()
 def deserialize(file_name, format='pickle'):
     if format == 'pickle':
         if os.path.exists(file_name):

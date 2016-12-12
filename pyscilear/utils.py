@@ -26,6 +26,7 @@ def initialise_logging(file_name=None, stderr=True):
 
 
 def func_log():
+    # type: () -> object
     def decorator_func(func):
         def wrapper_func(*args, **kwargs):
             if len(args) > 0:

@@ -13,14 +13,17 @@ def mark_job(job_id, state):
     upsert('jobs').row({'id': job_id}, {'state': state, 'done_processing': datetime.datetime.now()})
 
 
-def kickoff_and_wait(python_file, args, cpu_count=None):
+def kickoff_and_wait(python_file, args=[], cpu_count=None):
     if cpu_count is None:
         cpu_count = multiprocessing.cpu_count() - 1
+
     processes = []
     for i in range(0, cpu_count):
-        # thread = threading.Thread(target=fly.NewsOptimizer.process_ticker_list, args=())
-        # thread.setDaemon(True)
-        # thread.start()
+        for k, arg in enumerate(args):
+            if arg == '{$index$}':
+                args[k] = i
+            elif arg == '{$cpu_count$}':
+                args[k] = cpu_count
         arg_list = ['python', python_file] + args
         processes.append(Popen(arg_list))
         sleep(1)

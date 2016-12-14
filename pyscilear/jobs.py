@@ -21,9 +21,9 @@ def kickoff_and_wait(python_file, args=[], cpu_count=None):
     for i in range(0, cpu_count):
         for k, arg in enumerate(args):
             if arg == '{$index$}':
-                args[k] = i
+                args[k] = str(i)
             elif arg == '{$cpu_count$}':
-                args[k] = cpu_count
+                args[k] = str(cpu_count)
         arg_list = ['python', python_file] + args
         processes.append(Popen(arg_list))
         sleep(1)

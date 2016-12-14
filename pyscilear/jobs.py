@@ -19,12 +19,13 @@ def kickoff_and_wait(python_file, args=[], cpu_count=None):
 
     processes = []
     for i in range(0, cpu_count):
+        args_cpy = list(args)
         for k, arg in enumerate(args):
             if arg == '{$index$}':
-                args[k] = str(i)
+                args_cpy[k] = str(i)
             elif arg == '{$cpu_count$}':
-                args[k] = str(cpu_count)
-        arg_list = ['python', python_file] + args
+                args_cpy[k] = str(cpu_count)
+        arg_list = ['python', python_file] + args_cpy
         processes.append(Popen(arg_list))
         sleep(1)
     info('%d process spawn off for news polling' % cpu_count)

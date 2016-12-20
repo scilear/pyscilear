@@ -7,12 +7,15 @@ from psutil import Popen
 from pyscilear.pg import upsert
 import datetime
 
+from utils import func_log
+
 
 def mark_job(job_id, state):
     info('job %d is completed state = %s' % (job_id, state))
     upsert('jobs').row({'id': job_id}, {'state': state, 'done_processing': datetime.datetime.now()})
 
 
+@func_log()
 def kickoff_and_wait(python_file, args=[], cpu_count=None):
     if cpu_count is None:
         cpu_count = multiprocessing.cpu_count() - 1
@@ -30,5 +33,6 @@ def kickoff_and_wait(python_file, args=[], cpu_count=None):
         sleep(1)
     info('%d process spawn off for news polling' % cpu_count)
     for p in processes:
-        p.wait()
+        ret = p.wait(timeout=3600)
+        info('kickoff_and_wait: %s - %s ' % (str(p), str(ret)))
     info('All spawn terminated')

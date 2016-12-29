@@ -25,6 +25,10 @@ def initialise_logging(file_name=None, stderr=True):
     log_handler.push_application()
 
 
+def log_name(file_path):
+    return os.path.splitext(os.path.basename(file_path))[0]
+
+
 def func_log():
     # type: () -> object
     def decorator_func(func):
@@ -46,6 +50,7 @@ def func_log():
         return wrapper_func
 
     return decorator_func
+
 
 @func_log()
 def serialize(obj, file_name, format='pickle'):
@@ -86,4 +91,3 @@ def daterange_weekdays(start_date, end_date):
         if new_date.weekday() >= 5:
             continue
         yield new_date
-

@@ -1,5 +1,5 @@
 import multiprocessing
-
+import os
 from gevent import sleep
 from logbook import info
 from psutil import Popen
@@ -28,7 +28,13 @@ def kickoff_and_wait(python_file, args=[], cpu_count=None):
                 args_cpy[k] = str(i)
             elif arg == '{$cpu_count$}':
                 args_cpy[k] = str(cpu_count)
-        arg_list = ['python', python_file] + args_cpy
+
+        if os.name == 'nt':
+            python_executable = 'python'
+        else:
+            python_executable = '/home/fv/anaconda2/bin/python'
+
+        arg_list = [python_executable, python_file] + args_cpy
         processes.append(Popen(arg_list))
         sleep(1)
     info('%d process spawn off for news polling' % cpu_count)

@@ -22,7 +22,7 @@ def ___get_email_server_connection():
     return server_address, server_port, email_login, email_password
 
 
-def send_email(to_address, subject='', msg='', from_address=None):
+def send_email(to_address, subject='', text='', type='text', from_address=None):
     server_address, server_port, email_login, email_password = ___get_email_server_connection()
     if from_address is None:
         from_address = 'python_me@gmail.com'
@@ -40,8 +40,7 @@ def send_email(to_address, subject='', msg='', from_address=None):
     msg['From'] = from_address
     msg['To'] = to_address
     msg['Subject'] = subject
-    body = msg
-    msg.attach(MIMEText(body, 'plain'))
+    msg.attach(MIMEText(text, type))
     server = smtplib.SMTP(server_address, server_port)
     server.starttls()
     server.login(email_login, email_password)

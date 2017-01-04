@@ -11,8 +11,15 @@ from logbook import info, FileHandler, StreamHandler, error, warn
 
 
 def initialise_logging(file_name=None, stderr=True):
-    if file_name == None:
+    if file_name is None:
         file_name = 'python_log'
+    else:
+        base_name = os.path.basename(file_name)
+        split_file = os.path.splitext(base_name)
+        if split_file is not None and len(split_file) > 1:
+            file_name = split_file[0]
+        else:
+            file_name = base_name
     StreamHandler(sys.stdout, bubble=True).push_application()
     if os.path.exists(r'/var/log/'):
         log_handler = FileHandler('/var/log/' + file_name + '_'

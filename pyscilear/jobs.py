@@ -6,8 +6,11 @@ from psutil import Popen
 
 from pyscilear.pg import upsert
 import datetime
-
 from utils import func_log
+
+
+def create_job(job_group, info):
+    upsert('jobs').row({'job_group': job_group, 'info': info})
 
 
 def mark_job(job_id, state):

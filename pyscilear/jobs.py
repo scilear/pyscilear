@@ -4,13 +4,16 @@ from gevent import sleep
 from logbook import info
 from psutil import Popen
 
-from pyscilear.pg import upsert
+from pyscilear.pg import upsert, execute_query
 import datetime
 from utils import func_log
 
 
 def create_job(job_group, info, start_processing=datetime.datetime.now()):
-    upsert('jobs').row({'job_group': job_group, 'info': info, 'state': 0, 'start_processing': start_processing})
+    #upsert('jobs').row({'job_group': job_group, 'info': info, 'state': 0, 'start_processing': start_processing})
+    execute_query("insert into jobs (job_group, info, state, start_processing) "
+                  "values "
+                  "(%s, %s, %s, %s)", (job_group, info, 0, start_processing))
 
 
 def mark_job(job_id, state):

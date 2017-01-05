@@ -9,8 +9,8 @@ import datetime
 from utils import func_log
 
 
-def create_job(job_group, info):
-    upsert('jobs').row({'job_group': job_group, 'info': info})
+def create_job(job_group, info, start_processing=datetime.datetime.now()):
+    upsert('jobs').row({'job_group': job_group, 'info': info, 'state': 0, 'start_processing': start_processing})
 
 
 def mark_job(job_id, state):

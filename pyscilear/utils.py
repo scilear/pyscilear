@@ -7,8 +7,20 @@ from datetime import datetime
 import time
 
 from logbook import Logger
-from logbook import info, FileHandler, StreamHandler, error, warn
+from logbook import TRACE
+from logbook import info, FileHandler, StreamHandler, error, warn, DEBUG
 
+
+def get_log_level():
+    log_level = DEBUG
+    set_trace = False
+    try:
+        set_trace = os.environ['DEBUG_TRACE'] == 1
+    except:
+        pass
+    if set_trace:
+        log_level = TRACE
+    return log_level
 
 def initialise_logging(file_name=None, stderr=True):
     if file_name is None:
@@ -20,7 +32,9 @@ def initialise_logging(file_name=None, stderr=True):
             file_name = split_file[0]
         else:
             file_name = base_name
-    StreamHandler(sys.stdout, bubble=True).push_application()
+    log_level = get_log_level()
+
+    StreamHandler(sys.stdout, bubble=True, level=log_level).push_application()
     if os.path.exists(r'/var/log/'):
         log_handler = FileHandler('/var/log/' + file_name + '_'
                                   + datetime.now().isoformat().replace(':', '-') + '.log', bubble=True)
@@ -29,7 +43,9 @@ def initialise_logging(file_name=None, stderr=True):
         log_handler = FileHandler('c:\\logs\\' + file_name + '_'
                                   + datetime.now().isoformat().replace(':', '-') + '.log', bubble=True)
 
+    log_handler.level = log_level
     log_handler.push_application()
+
 
 
 def log_name(file_path):

@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import psycopg2
-from logbook import info, debug, error
+from logbook import info, trace, error
 from sqlalchemy import create_engine
 from upsert import Upsert
 
@@ -18,7 +18,7 @@ def get_db_access():
         db_user = ak.values[0][1]
         db_password = ak.values[0][2]
         db_host = ak.values[0][3]
-        debug(ak)
+        trace(ak)
     else:
         db_name = os.environ['PG_NAME']
         db_user = os.environ['PG_USER']
@@ -63,7 +63,7 @@ def get_pg_connection():
 
     db, user, pwd, host = get_db_access()
     conn_string = "dbname='%s' port='5432' user='%s' password='%s' host='%s'" % (db, user, pwd, host);
-    debug(conn_string)
+    trace(conn_string)
     PG_CONNECTION = psycopg2.connect(conn_string)
     return PG_CONNECTION
 
@@ -75,7 +75,7 @@ def execute_query(sql_query, data=None, autocommit=True):
             old_isolation_level = conn.isolation_level
             conn.set_isolation_level(0)
         cur = conn.cursor()
-        debug(sql_query)
+        trace(sql_query)
         cur.execute(sql_query, data)
         if autocommit:
             conn.set_isolation_level(old_isolation_level)
@@ -88,7 +88,7 @@ def execute_scalar(sql_query, data=None):
     try:
         conn = get_pg_connection()
         cur = conn.cursor()
-        debug(sql_query)
+        trace(sql_query)
         cur.execute(sql_query, data)
         conn.commit()  # needed when we return the id of an insert for instance
         results = cur.fetchone()
@@ -101,7 +101,7 @@ def execute_cursor(sql_query, data=None):
     try:
         conn = get_pg_connection()
         cur = conn.cursor()
-        debug('%s --params-- %s' % (sql_query, data))
+        trace('%s --params-- %s' % (sql_query, data))
         cur.execute(sql_query, data)
         conn.commit()  # needed when we return the id of an insert for instance
         results = cur.fetchall()

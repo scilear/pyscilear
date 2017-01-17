@@ -22,6 +22,7 @@ def get_log_level():
         log_level = TRACE
     return log_level
 
+
 def initialise_logging(file_name=None, stderr=True):
     if file_name is None:
         file_name = 'python_log'
@@ -47,16 +48,27 @@ def initialise_logging(file_name=None, stderr=True):
     log_handler.push_application()
 
 
-
 def log_name(file_path):
     return os.path.splitext(os.path.basename(file_path))[0]
+
+
+def not_yet_exit_time(hour, minute=0, weekday=None):
+    now = datetime.today()
+    if weekday is not None and now.weekday() < weekday:
+        return True
+    if now.hour < hour:
+        return True
+    elif now.hour > hour:
+        return False
+    else:
+        return now.minute < minute
 
 
 def func_log():
     # type: () -> object
     def decorator_func(func):
         def wrapper_func(*args, **kwargs):
-            if len(args) > 0:
+            if len(args) > 0 and args[0] != False:
                 logger = Logger(args[0].__class__.__name__)
             else:
                 logger = Logger(func.func_name)

@@ -68,7 +68,7 @@ def func_log():
     # type: () -> object
     def decorator_func(func):
         def wrapper_func(*args, **kwargs):
-            if len(args) > 0 and args[0] != False:
+            if len(args) > 0 and type(args[0]) == bool and args[0] != False:
                 logger = Logger(args[0].__class__.__name__)
             else:
                 logger = Logger(func.func_name)

@@ -6,6 +6,11 @@ from sqlalchemy import create_engine
 from upsert import Upsert
 
 
+def get_dataframe(sql, index_col=None, coerce_float=True, params=None,
+             parse_dates=None):
+    return pd.read_sql(sql, con=get_sqalchemy_engine(), index_col=index_col, coerce_float=coerce_float, params=params, parse_dates=parse_dates)
+
+
 def get_sqalchemy_engine():
     db, user, pwd, host = get_db_access()
     return create_engine('postgresql://%s:%s@%s/%s' % (user, pwd, host, db))

@@ -24,11 +24,11 @@ def get_db_access():
         db_password = ak.values[0][2]
         db_host = ak.values[0][3]
         trace(ak)
-    else:
-        db_name = os.environ['PG_NAME']
-        db_user = os.environ['PG_USER']
-        db_password = os.environ['PG_PASSWORD']
-        db_host = os.environ['PG_HOST']
+    else:  # TODO redundant with pg defaults...
+        db_name = os.environ['PGDATABASE']
+        db_user = os.environ['PGUSER']
+        db_password = os.environ['PGPASSWORD']
+        db_host = os.environ['PGHOST']
     return db_name, db_user, db_password, db_host
 
 
@@ -49,7 +49,7 @@ def rollback(reset=False):
         if reset:
             try:
                 PG_CONNECTION.close()
-            except Exception, e:
+            except Exception as e:
                 error('%s - error on connection close - %s' % (__name__, str(e)))
             finally:
                 PG_CONNECTION = None
@@ -85,7 +85,7 @@ def execute_query(sql_query, data=None, autocommit=True):
         if autocommit:
             conn.set_isolation_level(old_isolation_level)
         conn.commit()
-    except Exception, e:
+    except Exception as e:
         log_error(__name__, sql_query, str(e))
 
 
@@ -98,7 +98,7 @@ def execute_scalar(sql_query, data=None):
         conn.commit()  # needed when we return the id of an insert for instance
         results = cur.fetchone()
         return results
-    except Exception, e:
+    except Exception as e:
         log_error(__name__, sql_query, str(e))
 
 
@@ -111,7 +111,7 @@ def execute_cursor(sql_query, data=None):
         conn.commit()  # needed when we return the id of an insert for instance
         results = cur.fetchall()
         return results
-    except Exception, e:
+    except Exception as e:
         log_error(__name__, sql_query, str(e))
 
 
@@ -123,7 +123,7 @@ def execute_cursor_function(function_name, data=None):
         conn.commit()
         rows = cur.fetchall()
         return rows
-    except Exception, e:
+    except Exception as e:
         log_error(__name__, function_name, str(e))
 
 
@@ -144,7 +144,7 @@ def upsert(table, reset=False):
                 return upsert(table, True)
         assert (isinstance(upsert, Upsert))
         return upsert
-    except Exception, e:
+    except Exception as e:
         log_error(__name__, table, str(e))
         return None
 

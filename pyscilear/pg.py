@@ -5,10 +5,12 @@ from logbook import info, trace, error
 from sqlalchemy import create_engine
 from upsert import Upsert
 
+PG_CONNECTION = None
 
 def get_dataframe(sql, index_col=None, coerce_float=True, params=None,
-             parse_dates=None):
-    return pd.read_sql(sql, con=get_sqalchemy_engine(), index_col=index_col, coerce_float=coerce_float, params=params, parse_dates=parse_dates)
+                  parse_dates=None):
+    return pd.read_sql(sql, con=get_sqalchemy_engine(), index_col=index_col, coerce_float=coerce_float, params=params,
+                       parse_dates=parse_dates)
 
 
 def get_sqalchemy_engine():
@@ -32,16 +34,13 @@ def get_db_access():
     return db_name, db_user, db_password, db_host
 
 
-PG_CONNECTION = None
-
-
 def log_error(function_name, what, exception_str):
     error('%s - error on %s - %s' % (function_name, what, exception_str))
     rollback(True)
 
 
+
 def rollback(reset=False):
-    global PG_CONNECTION
     if PG_CONNECTION is not None:
         PG_CONNECTION.rollback()
         global UPSERTERS
@@ -56,14 +55,13 @@ def rollback(reset=False):
 
 
 def commit():
-    global PG_CONNECTION
     if PG_CONNECTION is not None and PG_CONNECTION.closed != 0:
         PG_CONNECTION.commit()
 
 
 def get_pg_connection():
     global PG_CONNECTION
-    if PG_CONNECTION is not None:
+    if PG_CONNECTION is not None and PG_CONNECTION.closed == 0:
         return PG_CONNECTION
 
     db, user, pwd, host = get_db_access()
@@ -71,6 +69,9 @@ def get_pg_connection():
     trace(conn_string)
     PG_CONNECTION = psycopg2.connect(conn_string)
     return PG_CONNECTION
+
+
+PG_CONNECTION = get_pg_connection()
 
 
 def execute_query(sql_query, data=None, autocommit=True):

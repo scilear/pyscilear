@@ -7,6 +7,7 @@ from upsert import Upsert
 
 PG_CONNECTION = None
 
+
 def get_dataframe(sql, index_col=None, coerce_float=True, params=None,
                   parse_dates=None):
     return pd.read_sql(sql, con=get_sqalchemy_engine(), index_col=index_col, coerce_float=coerce_float, params=params,
@@ -39,8 +40,8 @@ def log_error(function_name, what, exception_str):
     rollback(True)
 
 
-
 def rollback(reset=False):
+    global PG_CONNECTION
     if PG_CONNECTION is not None:
         PG_CONNECTION.rollback()
         global UPSERTERS
@@ -55,6 +56,7 @@ def rollback(reset=False):
 
 
 def commit():
+    global PG_CONNECTION
     if PG_CONNECTION is not None and PG_CONNECTION.closed != 0:
         PG_CONNECTION.commit()
 

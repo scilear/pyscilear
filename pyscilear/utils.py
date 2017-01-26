@@ -36,12 +36,12 @@ def initialise_logging(file_name=None, stderr=True):
     log_level = get_log_level()
 
     StreamHandler(sys.stdout, bubble=True, level=log_level).push_application()
-    if os.path.exists(r'/var/log/'):
-        log_handler = FileHandler('/var/log/' + file_name + '_'
+    if os.path.exists(r'/tmp/'):
+        log_handler = FileHandler('/tmp/' + file_name + '_'
                                   + datetime.now().isoformat().replace(':', '-') + '.log', bubble=True)
 
     else:
-        log_handler = FileHandler('c:\\logs\\' + file_name + '_'
+        log_handler = FileHandler('c:\\temp\\' + file_name + '_'
                                   + datetime.now().isoformat().replace(':', '-') + '.log', bubble=True)
 
     log_handler.level = log_level
@@ -68,18 +68,23 @@ def func_log():
     # type: () -> object
     def decorator_func(func):
         def wrapper_func(*args, **kwargs):
+            PY_VERSION = sys.version_info[0]
+            if PY_VERSION == 2:
+                func_name = func.func_name
+            elif PY_VERSION == 3:
+                func_name = func.__name__
             if len(args) > 0 and type(args[0]) == bool and args[0] != False:
                 logger = Logger(args[0].__class__.__name__)
             else:
-                logger = Logger(func.func_name)
-            logger.debug('+%s' % func.func_name)
+                logger = Logger(func_name)
+            logger.debug('+%s' % func_name)
             start_time = time.time()
 
             # Invoke the wrapped function first
             retval = func(*args, **kwargs)
 
             elapsed_time = time.time() - start_time
-            logger.debug('-%s - elasped %f s' % (func.func_name, elapsed_time))
+            logger.debug('-%s - elasped %f s' % (func_name, elapsed_time))
             return retval
 
         return wrapper_func

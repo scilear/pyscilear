@@ -1,12 +1,13 @@
 import multiprocessing
 import os
-from gevent import sleep
+import sys
+from time import sleep
 from logbook import info
 from psutil import Popen
 
 from pyscilear.pg import upsert, execute_query
 import datetime
-from utils import func_log
+from pyscilear.utils import func_log
 
 
 def create_job(job_group, info, start_processing=datetime.datetime.now()):
@@ -38,7 +39,11 @@ def kickoff_and_wait(python_file, args=[], cpu_count=None):
         if os.name == 'nt':
             python_executable = 'python'
         else:
-            python_executable = '/home/fv/anaconda2/bin/python'
+            PY_VERSION = sys.version_info[0]
+        if PY_VERSION == 2: 
+                python_executable = 'python'
+        elif PY_VERSION == 3: 
+                python_executable = 'python3'
 
         arg_list = [python_executable, python_file] + args_cpy
         processes.append(Popen(arg_list))

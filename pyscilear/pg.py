@@ -158,10 +158,13 @@ def query_to_file(query, file_name):
     conn.commit()
 
 
-def file_to_table(table, file_name):
+def file_to_table(table, file_name, columns=None):
     conn = get_pg_connection()
     cur = conn.cursor()
-    outputquery = "COPY %s FROM stdin WITH CSV HEADER DELIMITER as ',' " % table
+    if columns is None:
+        outputquery = "COPY %s FROM stdin WITH CSV HEADER DELIMITER as ',' " % table
+    else:
+        outputquery = "COPY %s(day,%s) FROM stdin WITH CSV HEADER DELIMITER as ',' " % (table, ','.join(columns))
     with open(file_name, 'r') as f:
         cur.copy_expert(outputquery, f)
 

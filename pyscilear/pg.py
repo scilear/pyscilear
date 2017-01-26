@@ -133,7 +133,7 @@ UPSERTERS = dict()
 def upsert(table, reset=False):
     global UPSERTERS
     try:
-        if reset or not UPSERTERS.has_key(table):
+        if reset or not table in UPSERTERS:
             conn = get_pg_connection()
             cur = conn.cursor()
             upsert = Upsert(cur, table)

@@ -5,7 +5,7 @@ from time import sleep
 from logbook import info
 from psutil import Popen
 
-from pyscilear.pg import upsert, execute_query
+from pyscilear.pg import execute_query
 import datetime
 from pyscilear.utils import func_log
 
@@ -19,7 +19,9 @@ def create_job(job_group, info, start_processing=datetime.datetime.now()):
 
 def mark_job(job_id, state):
     info('job %d is completed state = %s' % (job_id, state))
-    upsert('jobs').row({'id': job_id}, {'state': state, 'done_processing': datetime.datetime.now()})
+    execute_query("update  jobs set state=%s, done_processing=%s where job_id=%s",
+                  (state, datetime.datetime.now(), job_id))
+    #upsert('jobs').row({'id': job_id}, {'state': state, 'done_processing': datetime.datetime.now()})
 
 
 @func_log()

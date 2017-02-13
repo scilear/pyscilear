@@ -3,6 +3,7 @@ import pandas as pd
 import psycopg2
 from logbook import info, trace, error
 from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 from upsert import Upsert
 
 PG_CONNECTION = None
@@ -173,6 +174,31 @@ def file_to_table(table, file_name, columns=None):
 
     f.close()
     conn.commit()
+
+
+SESSION = None
+
+
+def get_sqlalchemy_session():
+    global SESSION
+    if SESSION is None or not SESSION.is_active:
+        Session = sessionmaker(bind=get_sqalchemy_engine(), autoflush=False)
+        SESSION = Session()
+    return SESSION
+
+
+def sqalchemy_upsert(orm_object):
+    #get_sqlalchemy_session().saveorupdate(orm_object)
+    get_sqlalchemy_session().merge(orm_object)
+
+
+def sqalchemy_insert(orm_object):
+    get_sqlalchemy_session().add(orm_object)
+
+
+def sqalchemy_commit():
+    get_sqlalchemy_session().commit()
+    get_sqlalchemy_session().flush()
 
 
 if __name__ == "__main__":

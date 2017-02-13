@@ -1,8 +1,17 @@
 import os
+import sys
 import smtplib
 import pandas as pd
-from email.MIMEMultipart import MIMEMultipart
-from email.MIMEText import MIMEText
+
+PY_VERSION = sys.version_info[0]
+
+if PY_VERSION == 2:
+    from email.MIMEMultipart import MIMEMultipart
+    from email.MIMEText import MIMEText
+else:
+    from email.mime.multipart import MIMEMultipart
+    from email.mime.text import MIMEText
+
 from logbook import debug
 
 

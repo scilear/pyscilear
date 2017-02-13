@@ -5,7 +5,7 @@ from time import sleep
 from logbook import info
 from psutil import Popen
 
-from pyscilear.pg import execute_query
+from pyscilear.pg import execute_query, execute_cursor_function, execute_scalar
 import datetime
 from pyscilear.utils import func_log
 
@@ -15,6 +15,31 @@ def create_job(job_group, info, start_processing=datetime.datetime.now()):
     execute_query("insert into jobs (job_group, info, state, start_processing) "
                   "values "
                   "(%s, %s, %s, %s)", (job_group, info, 0, start_processing))
+
+
+def create_job_batch(job_creator_group, sql):
+    # to avoid concurrent update we create a job and process it,
+    # it is better than locking the whole table as non related process may be using it
+    # TODO a bit ugly, need to have some better system where get_pending_job of group resets to 0 global job
+    # creation or something like that, might face same issues though as
+
+    execute_query("""
+    insert into jobs (job_group, info)
+        select job_group, info from
+        (select %s::varchar job_group, 'lock'::varchar info) new_job
+        where not exists
+        (select 1 from jobs j where j.job_group=new_job.job_group and (j.state<2 or j.done_processing>current_timestamp-INTERVAL '30 seconds'));
+    """, (job_creator_group,))
+
+    jobs = execute_cursor_function('get_pending_jobs', (job_creator_group, 1000000))
+    done = False
+    if len(jobs) == 0:
+        return
+    for job in jobs:
+        if not done:
+            execute_query(sql)
+            done = True
+        mark_job(job[0], 2)
 
 
 def mark_job(job_id, state):

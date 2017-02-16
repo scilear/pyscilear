@@ -106,14 +106,14 @@ def func_log():
                 logger = Logger(args[0].__class__.__name__)
             else:
                 logger = Logger(func_name)
-            logger.debug('+%s' % func_name)
+            logger.debug('[PID %s]: +%s' % (PID, func_name))
             start_time = time.time()
 
             # Invoke the wrapped function first
             retval = func(*args, **kwargs)
 
             elapsed_time = time.time() - start_time
-            logger.debug('-%s - elasped %f s' % (func_name, elapsed_time))
+            logger.debug('[PID %s]: -%s - elasped %f s' % (PID, func_name, elapsed_time))
             return retval
 
         return wrapper_func

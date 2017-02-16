@@ -6,7 +6,7 @@ import sys
 from datetime import datetime, timedelta
 import time
 
-from logbook import Logger
+from logbook import Logger, debug, trace, warning, critical, catch_exceptions, exception, notice
 from logbook import TRACE
 from logbook import info, FileHandler, StreamHandler, error, warn, DEBUG
 
@@ -23,7 +23,12 @@ def get_log_level():
     return log_level
 
 
+PID = 0
+
+
 def initialise_logging(file_name=None, stderr=True):
+    global PID
+    PID = os.getpid()
     if file_name is None:
         file_name = 'python_log'
     else:
@@ -46,6 +51,30 @@ def initialise_logging(file_name=None, stderr=True):
 
     log_handler.level = log_level
     log_handler.push_application()
+
+
+def log(msg, verbosity=debug):
+    enriched_msg = '[PID %s]: %s' % (PID, msg)
+    if verbosity == debug:
+        debug(enriched_msg)
+    elif verbosity == trace:
+        trace(enriched_msg)
+    elif verbosity == info:
+        info(enriched_msg)
+    elif verbosity == warn:
+        warn(enriched_msg)
+    elif verbosity == warning:
+        warning(enriched_msg)
+    elif verbosity == notice:
+        notice(enriched_msg)
+    elif verbosity == error:
+        error(enriched_msg)
+    elif verbosity == exception:
+        exception(enriched_msg)
+    elif verbosity == catch_exceptions:
+        catch_exceptions(enriched_msg)
+    elif verbosity == critical:
+        critical(enriched_msg)
 
 
 def log_name(file_path):

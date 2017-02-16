@@ -188,7 +188,7 @@ def get_sqlalchemy_session():
 
 
 def sqalchemy_upsert(orm_object):
-    #get_sqlalchemy_session().saveorupdate(orm_object)
+    # get_sqlalchemy_session().saveorupdate(orm_object)
     get_sqlalchemy_session().merge(orm_object)
 
 
@@ -197,7 +197,11 @@ def sqalchemy_insert(orm_object):
 
 
 def sqalchemy_commit():
+    get_sqlalchemy_session().flush()
     get_sqlalchemy_session().commit()
+
+
+def sqalchemy_flush():
     get_sqlalchemy_session().flush()
 
 

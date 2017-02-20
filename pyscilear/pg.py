@@ -204,6 +204,10 @@ def sqalchemy_commit():
     get_sqlalchemy_session().commit()
 
 
+def sqalchemy_rollback():
+    get_sqlalchemy_session().rollback()
+
+
 def sqalchemy_flush():
     get_sqlalchemy_session().flush()
 

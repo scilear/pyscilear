@@ -5,7 +5,7 @@ from logbook import info, trace, error
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from upsert import Upsert
-from utils import log
+from pyscilear.utils import log
 
 PG_CONNECTION = None
 

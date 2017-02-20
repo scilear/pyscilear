@@ -184,10 +184,11 @@ SESSION = None
 def get_sqlalchemy_session():
     global SESSION
     if SESSION is None:
-        log('creating news SQLAlchemy session', info)
+        log('creating new SQLAlchemy session', info)
         Session = sessionmaker(bind=get_sqalchemy_engine(), autoflush=False)
         SESSION = Session()
     elif not SESSION.is_active:
+        log('SQLAlchemy session is not active', info)
         SESSION.rollback()
     return SESSION
 
@@ -208,13 +209,15 @@ def sqalchemy_commit():
 
 def sqalchemy_rollback():
     # cant use normal sesison getter as it woudl create a new session if not active (ie partial rollback mode)
+    log('SQLAlchemy rollback initiated', info)
     global SESSION
     if SESSION is not None:
         SESSION.rollback()
 
 
 def sqalchemy_close():
-    get_sqlalchemy_session().close()
+    log('SQLAlchemy close initiated', info)
+    get_sqlalchemy_session().close_all()
 
 
 def sqalchemy_flush():

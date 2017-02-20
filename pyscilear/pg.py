@@ -5,6 +5,7 @@ from logbook import info, trace, error
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from upsert import Upsert
+from utils import log
 
 PG_CONNECTION = None
 
@@ -70,6 +71,7 @@ def get_pg_connection():
     db, user, pwd, host = get_db_access()
     conn_string = "dbname='%s' port='5432' user='%s' password='%s' host='%s'" % (db, user, pwd, host);
     trace(conn_string)
+    log('creating news connection', info)
     PG_CONNECTION = psycopg2.connect(conn_string)
     return PG_CONNECTION
 
@@ -182,6 +184,7 @@ SESSION = None
 def get_sqlalchemy_session():
     global SESSION
     if SESSION is None or not SESSION.is_active:
+        log('creating news SQLAlchemy session', info)
         Session = sessionmaker(bind=get_sqalchemy_engine(), autoflush=False)
         SESSION = Session()
     return SESSION

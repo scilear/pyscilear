@@ -205,7 +205,14 @@ def sqalchemy_commit():
 
 
 def sqalchemy_rollback():
-    get_sqlalchemy_session().rollback()
+    # cant use normal sesison getter as it woudl create a new session if not active (ie partial rollback mode)
+    global SESSION
+    if SESSION is not None:
+        SESSION.rollback()
+
+
+def sqalchemy_close():
+    get_sqlalchemy_session().close()
 
 
 def sqalchemy_flush():

@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import psycopg2
-from logbook import info, trace, error
+from logbook import info, trace, error, debug
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from upsert import Upsert
@@ -71,7 +71,7 @@ def get_pg_connection():
     db, user, pwd, host = get_db_access()
     conn_string = "dbname='%s' port='5432' user='%s' password='%s' host='%s'" % (db, user, pwd, host);
     trace(conn_string)
-    log('creating news connection', info)
+    log('creating news connection', debug)
     PG_CONNECTION = psycopg2.connect(conn_string)
     return PG_CONNECTION
 
@@ -184,11 +184,11 @@ SESSION = None
 def get_sqlalchemy_session():
     global SESSION
     if SESSION is None:
-        log('creating new SQLAlchemy session', info)
+        log('creating new SQLAlchemy session', debug)
         Session = sessionmaker(bind=get_sqalchemy_engine(), autoflush=False)
         SESSION = Session()
     elif not SESSION.is_active:
-        log('SQLAlchemy session is not active', info)
+        log('SQLAlchemy session is not active', debug)
         SESSION.rollback()
     return SESSION
 
@@ -209,14 +209,14 @@ def sqalchemy_commit():
 
 def sqalchemy_rollback():
     # cant use normal sesison getter as it woudl create a new session if not active (ie partial rollback mode)
-    log('SQLAlchemy rollback initiated', info)
+    log('SQLAlchemy rollback initiated', debug)
     global SESSION
     if SESSION is not None:
         SESSION.rollback()
 
 
 def sqalchemy_close():
-    log('SQLAlchemy close initiated', info)
+    log('SQLAlchemy close initiated', debug)
     get_sqlalchemy_session().close_all()
 
 

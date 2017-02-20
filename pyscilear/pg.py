@@ -183,10 +183,12 @@ SESSION = None
 
 def get_sqlalchemy_session():
     global SESSION
-    if SESSION is None or not SESSION.is_active:
+    if SESSION is None:
         log('creating news SQLAlchemy session', info)
         Session = sessionmaker(bind=get_sqalchemy_engine(), autoflush=False)
         SESSION = Session()
+    elif not SESSION.is_active:
+        SESSION.rollback()
     return SESSION
 
 

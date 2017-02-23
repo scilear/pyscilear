@@ -1,11 +1,8 @@
 import os
-import socket
 
 import pandas as pd
 import psycopg2
-import sys
 from logbook import info, trace, error, debug
-from pilfile import args
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool
@@ -31,6 +28,10 @@ def get_sqlalchemy_engine():
     #return create_engine('postgresql://%s:%s@%s/%s' % (user, pwd, host, db), pool_size=5, max_overflow=0)
 
     # 3-
+    # import socket
+    # import sys
+    # from pilfile import args
+
     # prog = os.path.basename(sys.argv[0]) or 'desjob'
     # username = pwd.getpwuid (os.getuid ()).pw_name
     # hostname = socket.gethostname().split(".")[0]·

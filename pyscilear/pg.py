@@ -12,11 +12,11 @@ PG_CONNECTION = None
 
 def get_dataframe(sql, index_col=None, coerce_float=True, params=None,
                   parse_dates=None):
-    return pd.read_sql(sql, con=get_sqalchemy_engine(), index_col=index_col, coerce_float=coerce_float, params=params,
+    return pd.read_sql(sql, con=get_sqlalchemy_engine(), index_col=index_col, coerce_float=coerce_float, params=params,
                        parse_dates=parse_dates)
 
 
-def get_sqalchemy_engine():
+def get_sqlalchemy_engine():
     db, user, pwd, host = get_db_access()
     return create_engine('postgresql://%s:%s@%s/%s' % (user, pwd, host, db))
 
@@ -187,7 +187,7 @@ def get_sqlalchemy_session():
     global SESSION
     if SESSION is None:
         log('creating new SQLAlchemy session', debug)
-        Session = sessionmaker(bind=get_sqalchemy_engine(), autoflush=False)
+        Session = sessionmaker(bind=get_sqlalchemy_engine(), autoflush=False)
         SESSION = Session()
     elif not SESSION.is_active:
         log('SQLAlchemy session is not active', debug)
@@ -195,21 +195,21 @@ def get_sqlalchemy_session():
     return SESSION
 
 
-def sqalchemy_upsert(orm_object):
+def sqlalchemy_upsert(orm_object):
     # get_sqlalchemy_session().saveorupdate(orm_object)
     get_sqlalchemy_session().merge(orm_object)
 
 
-def sqalchemy_insert(orm_object):
+def sqlalchemy_insert(orm_object):
     get_sqlalchemy_session().add(orm_object)
 
 
-def sqalchemy_commit():
+def sqlalchemy_commit():
     get_sqlalchemy_session().flush()
     get_sqlalchemy_session().commit()
 
 
-def sqalchemy_rollback():
+def sqlalchemy_rollback():
     # cant use normal sesison getter as it woudl create a new session if not active (ie partial rollback mode)
     log('SQLAlchemy rollback initiated', debug)
     global SESSION
@@ -217,35 +217,35 @@ def sqalchemy_rollback():
         SESSION.rollback()
 
 
-def sqalchemy_close():
+def sqlalchemy_close():
     log('SQLAlchemy close initiated', debug)
     get_sqlalchemy_session().close_all()
 
 
-def sqalchemy_flush():
+def sqlalchemy_flush():
     get_sqlalchemy_session().flush()
 
-
-if __name__ == "__main__":
-    # res = execute_cursor('select * from daily_data limit 10')
-    # print res
-
-    # large_query = "select * from daily_ema_dataset limit 1000000"
-    # query_to_file(large_query, 'large_query.csv')
-
-    filename = 'test_queries.csv'
-    query_to_file('select * from daily_data limit 100', filename)
-    execute_query('create table test_pyscilear as select * from daily_data where 1=2')
-    file_to_table('test_pyscilear', filename)
-    print(execute_scalar('select count(*) from test_pyscilear')[0])
-    execute_query('drop table test_pyscilear')
-
-    """
-    conn = get_pg_connection()
-    cur = conn.cursor()
-    cur.callproc("get_pending_jobs", ('news_sent', 10))
-
-    # named_cursor = conn.cursor(name='cursor_x')
-    for row in cur:
-        print row
-    """
+#
+# if __name__ == "__main__":
+#     # res = execute_cursor('select * from daily_data limit 10')
+#     # print res
+#
+#     # large_query = "select * from daily_ema_dataset limit 1000000"
+#     # query_to_file(large_query, 'large_query.csv')
+#
+#     filename = 'test_queries.csv'
+#     query_to_file('select * from daily_data limit 100', filename)
+#     execute_query('create table test_pyscilear as select * from daily_data where 1=2')
+#     file_to_table('test_pyscilear', filename)
+#     print(execute_scalar('select count(*) from test_pyscilear')[0])
+#     execute_query('drop table test_pyscilear')
+#
+#     """
+#     conn = get_pg_connection()
+#     cur = conn.cursor()
+#     cur.callproc("get_pending_jobs", ('news_sent', 10))
+#
+#     # named_cursor = conn.cursor(name='cursor_x')
+#     for row in cur:
+#         print row
+#     """

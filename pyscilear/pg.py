@@ -1,9 +1,14 @@
 import os
+import socket
+
 import pandas as pd
 import psycopg2
+import sys
 from logbook import info, trace, error, debug
+from pilfile import args
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import NullPool
 from upsert import Upsert
 from pyscilear.utils import log
 
@@ -18,7 +23,26 @@ def get_dataframe(sql, index_col=None, coerce_float=True, params=None,
 
 def get_sqlalchemy_engine():
     db, user, pwd, host = get_db_access()
-    return create_engine('postgresql://%s:%s@%s/%s' % (user, pwd, host, db))
+    #4 options
+
+    # 1-
+    #return create_engine('postgresql://%s:%s@%s/%s' % (user, pwd, host, db))
+    # 2-
+    #return create_engine('postgresql://%s:%s@%s/%s' % (user, pwd, host, db), pool_size=5, max_overflow=0)
+
+    # 3-
+    # prog = os.path.basename(sys.argv[0]) or 'desjob'
+    # username = pwd.getpwuid (os.getuid ()).pw_name
+    # hostname = socket.gethostname().split(".")[0]·
+    # args.setdefault('connect_args', {'application_name': "%s:%s@%s" %
+    #     (prog, username, hostname)})
+    # args.setdefault('isolation_level', "AUTOCOMMIT")
+    # engine = create_engine(url, **args)
+    # return engine
+
+    # 4-
+    return create_engine('postgresql://%s:%s@%s/%s' % (user, pwd, host, db), poolclass=NullPool)
+
 
 
 def get_db_access():

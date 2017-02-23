@@ -79,7 +79,7 @@ def get_pg_connection():
 PG_CONNECTION = get_pg_connection()
 
 
-def execute_query(sql_query, data=None, autocommit=True):
+def execute_query(sql_query, data=None, commit_right_after=True, autocommit=True):
     try:
         conn = get_pg_connection()
         if autocommit:
@@ -90,18 +90,20 @@ def execute_query(sql_query, data=None, autocommit=True):
         cur.execute(sql_query, data)
         if autocommit:
             conn.set_isolation_level(old_isolation_level)
-        conn.commit()
+        if commit_right_after:
+            conn.commit()
     except Exception as e:
         log_error(__name__, sql_query, str(e))
 
 
-def execute_scalar(sql_query, data=None):
+def execute_scalar(sql_query, data=None, commit_right_after=True):
     try:
         conn = get_pg_connection()
         cur = conn.cursor()
         trace(sql_query)
         cur.execute(sql_query, data)
-        conn.commit()  # needed when we return the id of an insert for instance
+        if commit_right_after:
+            conn.commit()  # needed when we return the id of an insert for instance
         results = cur.fetchone()
         return results
     except Exception as e:

@@ -2,6 +2,8 @@ import multiprocessing
 import os
 import sys
 from time import sleep
+
+import psutil
 from logbook import info
 from psutil import Popen
 
@@ -16,6 +18,16 @@ def create_job(job_group, info, start_processing=datetime.datetime.now()):
                   "values "
                   "(%s, %s, %s, %s)", (job_group, info, 0, start_processing))
 
+
+def is_primary_process(python_file):
+    file_name = os.path.basename(python_file)
+    pid = os.getpid()
+    for process in psutil.process_iter():
+        cmdline = process.cmdline()
+        for p in cmdline:
+            if file_name in p and pid > process.pid:
+                return False
+    return True
 
 def create_job_batch(job_creator_group, sql):
     # to avoid concurrent update we create a job and process it,

@@ -27,7 +27,7 @@ def ___get_email_server_connection():
         email_login = os.environ['EMAIL_LOGIN']
         email_password = os.environ['EMAIL_PASSWORD']
         server_address = os.environ['EMAIL_SERVER']
-        server_port = os.environ['EMAIL_SERVER_PORT']
+        server_port = os.environ['EMAIL_PORT']
     return server_address, server_port, email_login, email_password
 
 

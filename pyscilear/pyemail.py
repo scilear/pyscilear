@@ -34,13 +34,13 @@ def ___get_email_server_connection():
 def send_email(to_address, subject='', text='', type='text', from_address=None):
     server_address, server_port, email_login, email_password = ___get_email_server_connection()
     if from_address is None:
-        from_address = 'python_me@gmail.com'
+        from_address = 'reportmailer@finquartz.com'
 
     if subject == '':
         subject = 'pyscilear.pyemail: test mode'
         msg = '''
                  From: Me@my.org
-                Subject: testin'
+                Subject: testing'
 
                 This is a test
             '''

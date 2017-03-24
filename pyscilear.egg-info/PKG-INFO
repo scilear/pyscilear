@@ -1,0 +1,15 @@
+Metadata-Version: 1.1
+Name: pyscilear
+Version: 2016.3.24
+Summary: scilear utilities
+Home-page: https://github.com/scilear/pyscilear.git
+Author: Scilear
+Author-email: scilear@gmail.com
+License: MIT
+Description: UNKNOWN
+Platform: UNKNOWN
+Requires: logbook
+Requires: psycopg2
+Requires: sqlalchemy
+Requires: pandas
+Requires: boto

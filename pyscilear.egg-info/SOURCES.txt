@@ -1,0 +1,14 @@
+setup.py
+pyscilear/__init__.py
+pyscilear/aws.py
+pyscilear/jobs.py
+pyscilear/pg.py
+pyscilear/profiling.py
+pyscilear/pyemail.py
+pyscilear/sqlite.py
+pyscilear/utils.py
+pyscilear.egg-info/PKG-INFO
+pyscilear.egg-info/SOURCES.txt
+pyscilear.egg-info/dependency_links.txt
+pyscilear.egg-info/not-zip-safe
+pyscilear.egg-info/top_level.txt

@@ -1,10 +1,9 @@
+import json
 import os
 import pickle
-import json
 import sys
-
-from datetime import datetime, timedelta
 import time
+from datetime import datetime, timedelta
 
 from logbook import Logger, debug, trace, warning, critical, catch_exceptions, exception, notice
 from logbook import TRACE
@@ -93,7 +92,7 @@ def not_yet_exit_time(hour, minute=0, weekday=None):
         return now.minute < minute
 
 
-def func_log():
+def func_log() -> object:
     # type: () -> object
     def decorator_func(func):
         def wrapper_func(*args, **kwargs):

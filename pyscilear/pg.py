@@ -18,14 +18,14 @@ def get_dataframe(sql, index_col=None, coerce_float=True, params=None,
                        parse_dates=parse_dates)
 
 
-def get_sqlalchemy_engine():
-    db, user, pwd, host = get_db_access()
-    #4 options
+def get_sqlalchemy_engine(db_name=None):
+    db, user, pwd, host = get_db_access(db_name)
+    # 4 options
 
     # 1-
-    #return create_engine('postgresql://%s:%s@%s/%s' % (user, pwd, host, db))
+    # return create_engine('postgresql://%s:%s@%s/%s' % (user, pwd, host, db))
     # 2-
-    #return create_engine('postgresql://%s:%s@%s/%s' % (user, pwd, host, db), pool_size=5, max_overflow=0)
+    # return create_engine('postgresql://%s:%s@%s/%s' % (user, pwd, host, db), pool_size=5, max_overflow=0)
 
     # 3-
     # import socket
@@ -45,20 +45,12 @@ def get_sqlalchemy_engine():
     return create_engine('postgresql://%s:%s@%s/%s' % (user, pwd, host, db), poolclass=NullPool)
 
 
-
-def get_db_access():
-    if os.path.exists('db_access'):
-        ak = pd.read_csv('db_access')
-        db_name = ak.values[0][0]
-        db_user = ak.values[0][1]
-        db_password = ak.values[0][2]
-        db_host = ak.values[0][3]
-        trace(ak)
-    else:  # TODO redundant with pg defaults...
+def get_db_access(db_name=''):
+    if db_name is None or db_name == '':
         db_name = os.environ['PGDATABASE']
-        db_user = os.environ['PGUSER']
-        db_password = os.environ['PGPASSWORD']
-        db_host = os.environ['PGHOST']
+    db_user = os.environ['PGUSER']
+    db_password = os.environ['PGPASSWORD']
+    db_host = os.environ['PGHOST']
     return db_name, db_user, db_password, db_host
 
 
@@ -208,11 +200,11 @@ def file_to_table(table, file_name, columns=None):
 SESSION = None
 
 
-def get_sqlalchemy_session():
+def get_sqlalchemy_session(db_name=None):
     global SESSION
     if SESSION is None:
         log('creating new SQLAlchemy session', debug)
-        Session = sessionmaker(bind=get_sqlalchemy_engine(), autoflush=False)
+        Session = sessionmaker(bind=get_sqlalchemy_engine(db_name), autoflush=False)
         SESSION = Session()
     elif not SESSION.is_active:
         log('SQLAlchemy session is not active', debug)

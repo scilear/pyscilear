@@ -4,6 +4,7 @@ pyscilear/aws.py
 pyscilear/jobs.py
 pyscilear/pg.py
 pyscilear/profiling.py
+pyscilear/pubsub.py
 pyscilear/pyemail.py
 pyscilear/sqlite.py
 pyscilear/utils.py

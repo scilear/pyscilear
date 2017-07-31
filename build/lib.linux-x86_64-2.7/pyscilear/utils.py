@@ -89,10 +89,10 @@ def not_yet_exit_time(hour, minute=0, weekday=None):
     elif now.hour > hour:
         return False
     else:
-        return now.minute < minute
+        return now.minute > minute
 
 
-def func_log() -> object:
+def func_log():
     # type: () -> object
     def decorator_func(func):
         def wrapper_func(*args, **kwargs):

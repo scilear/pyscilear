@@ -1,12 +1,10 @@
 import os
-
 import pandas as pd
 import psycopg2
 from logbook import info, trace, error, debug
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool
-from upsert import Upsert
 from pyscilear.utils import log
 
 PG_CONNECTION = None
@@ -18,14 +16,14 @@ def get_dataframe(sql, index_col=None, coerce_float=True, params=None,
                        parse_dates=parse_dates)
 
 
-def get_sqlalchemy_engine():
-    db, user, pwd, host = get_db_access()
-    #4 options
+def get_sqlalchemy_engine(db_name=None):
+    db, user, pwd, host = get_db_access(db_name)
+    # 4 options
 
     # 1-
-    #return create_engine('postgresql://%s:%s@%s/%s' % (user, pwd, host, db))
+    # return create_engine('postgresql://%s:%s@%s/%s' % (user, pwd, host, db))
     # 2-
-    #return create_engine('postgresql://%s:%s@%s/%s' % (user, pwd, host, db), pool_size=5, max_overflow=0)
+    # return create_engine('postgresql://%s:%s@%s/%s' % (user, pwd, host, db), pool_size=5, max_overflow=0)
 
     # 3-
     # import socket
@@ -45,20 +43,12 @@ def get_sqlalchemy_engine():
     return create_engine('postgresql://%s:%s@%s/%s' % (user, pwd, host, db), poolclass=NullPool)
 
 
-
-def get_db_access():
-    if os.path.exists('db_access'):
-        ak = pd.read_csv('db_access')
-        db_name = ak.values[0][0]
-        db_user = ak.values[0][1]
-        db_password = ak.values[0][2]
-        db_host = ak.values[0][3]
-        trace(ak)
-    else:  # TODO redundant with pg defaults...
+def get_db_access(db_name=''):
+    if db_name is None or db_name == '':
         db_name = os.environ['PGDATABASE']
-        db_user = os.environ['PGUSER']
-        db_password = os.environ['PGPASSWORD']
-        db_host = os.environ['PGHOST']
+    db_user = os.environ['PGUSER']
+    db_password = os.environ['PGPASSWORD']
+    db_host = os.environ['PGHOST']
     return db_name, db_user, db_password, db_host
 
 
@@ -88,23 +78,24 @@ def commit():
         PG_CONNECTION.commit()
 
 
-def get_pg_connection():
+def get_pg_connection(db_name=None):
     global PG_CONNECTION
     if PG_CONNECTION is not None and PG_CONNECTION.closed == 0:
         return PG_CONNECTION
 
-    db, user, pwd, host = get_db_access()
-    conn_string = "dbname='%s' port='5432' user='%s' password='%s' host='%s'" % (db, user, pwd, host);
+    db, user, pwd, host = get_db_access(db_name=db_name)
+    conn_string = "dbname='%s' port='5432' user='%s' password='%s' host='%s'" % (db, user, pwd, host)
     trace(conn_string)
-    log('creating news connection', debug)
+    log('creating new connection', debug)
     PG_CONNECTION = psycopg2.connect(conn_string)
+    PG_CONNECTION.cursor().execute('set search_path = news,public;')
     return PG_CONNECTION
 
 
 PG_CONNECTION = get_pg_connection()
 
 
-def execute_query(sql_query, data=None, commit_right_after=True, autocommit=True):
+def execute_query(sql_query, data=None, commit_right_after=True, autocommit=True, auto_catch=False):
     try:
         conn = get_pg_connection()
         if autocommit:
@@ -118,13 +109,16 @@ def execute_query(sql_query, data=None, commit_right_after=True, autocommit=True
         if commit_right_after:
             conn.commit()
     except Exception as e:
-        log_error(__name__, sql_query, str(e))
+        if auto_catch:
+            log_error(__name__, sql_query, str(e))
+        else:
+            raise
 
 
-def execute_scalar(sql_query, data=None, commit_right_after=True):
+def execute_scalar(sql_query, data=None, commit_right_after=True, db_name=None, auto_catch=False):
     try:
-        conn = get_pg_connection()
-        cur = conn.cursor()
+        conn = get_pg_connection(db_name)
+        cur = get_pg_connection(db_name).cursor()
         trace(sql_query)
         cur.execute(sql_query, data)
         if commit_right_after:
@@ -132,10 +126,13 @@ def execute_scalar(sql_query, data=None, commit_right_after=True):
         results = cur.fetchone()
         return results
     except Exception as e:
-        log_error(__name__, sql_query, str(e))
+        if auto_catch:
+            log_error(__name__, sql_query, str(e))
+        else:
+            raise
 
 
-def execute_cursor(sql_query, data=None):
+def execute_cursor(sql_query, data=None, auto_catch=False):
     try:
         conn = get_pg_connection()
         cur = conn.cursor()
@@ -145,10 +142,13 @@ def execute_cursor(sql_query, data=None):
         results = cur.fetchall()
         return results
     except Exception as e:
-        log_error(__name__, sql_query, str(e))
+        if auto_catch:
+            log_error(__name__, sql_query, str(e))
+        else:
+            raise
 
 
-def execute_cursor_function(function_name, data=None):
+def execute_cursor_function(function_name, data=None, auto_catch=False):
     try:
         conn = get_pg_connection()
         cur = conn.cursor()
@@ -157,29 +157,10 @@ def execute_cursor_function(function_name, data=None):
         rows = cur.fetchall()
         return rows
     except Exception as e:
-        log_error(__name__, function_name, str(e))
-
-
-UPSERTERS = dict()
-
-
-def upsert(table, reset=False):
-    global UPSERTERS
-    try:
-        if reset or not table in UPSERTERS:
-            conn = get_pg_connection()
-            cur = conn.cursor()
-            upsert = Upsert(cur, table)
-            UPSERTERS[table] = upsert
+        if auto_catch:
+            log_error(__name__, function_name, str(e))
         else:
-            upsert = UPSERTERS[table]
-            if upsert.cursor.closed != 0 or upsert.cursor.connection.closed != 0 or upsert is None:
-                return upsert(table, True)
-        assert (isinstance(upsert, Upsert))
-        return upsert
-    except Exception as e:
-        log_error(__name__, table, str(e))
-        return None
+            raise
 
 
 def query_to_file(query, file_name):
@@ -208,11 +189,11 @@ def file_to_table(table, file_name, columns=None):
 SESSION = None
 
 
-def get_sqlalchemy_session():
+def get_sqlalchemy_session(db_name=None):
     global SESSION
     if SESSION is None:
         log('creating new SQLAlchemy session', debug)
-        Session = sessionmaker(bind=get_sqlalchemy_engine(), autoflush=False)
+        Session = sessionmaker(bind=get_sqlalchemy_engine(db_name), autoflush=False)
         SESSION = Session()
     elif not SESSION.is_active:
         log('SQLAlchemy session is not active', debug)

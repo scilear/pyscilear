@@ -1,12 +1,10 @@
 import os
-
 import pandas as pd
 import psycopg2
 from logbook import info, trace, error, debug
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool
-from upsert import Upsert
 from pyscilear.utils import log
 
 PG_CONNECTION = None
@@ -88,7 +86,7 @@ def get_pg_connection(db_name=None):
     db, user, pwd, host = get_db_access(db_name=db_name)
     conn_string = "dbname='%s' port='5432' user='%s' password='%s' host='%s'" % (db, user, pwd, host)
     trace(conn_string)
-    log('creating news connection', debug)
+    log('creating new connection', debug)
     PG_CONNECTION = psycopg2.connect(conn_string)
     PG_CONNECTION.cursor().execute('set search_path = news,public;')
     return PG_CONNECTION
@@ -97,7 +95,7 @@ def get_pg_connection(db_name=None):
 PG_CONNECTION = get_pg_connection()
 
 
-def execute_query(sql_query, data=None, commit_right_after=True, autocommit=True):
+def execute_query(sql_query, data=None, commit_right_after=True, autocommit=True, auto_catch=False):
     try:
         conn = get_pg_connection()
         if autocommit:
@@ -111,13 +109,16 @@ def execute_query(sql_query, data=None, commit_right_after=True, autocommit=True
         if commit_right_after:
             conn.commit()
     except Exception as e:
-        log_error(__name__, sql_query, str(e))
+        if auto_catch:
+            log_error(__name__, sql_query, str(e))
+        else:
+            raise
 
 
-def execute_scalar(sql_query, data=None, commit_right_after=True, db_name=None):
+def execute_scalar(sql_query, data=None, commit_right_after=True, db_name=None, auto_catch=False):
     try:
         conn = get_pg_connection(db_name)
-        cur = conn.cursor()
+        cur = get_pg_connection(db_name).cursor()
         trace(sql_query)
         cur.execute(sql_query, data)
         if commit_right_after:
@@ -125,10 +126,13 @@ def execute_scalar(sql_query, data=None, commit_right_after=True, db_name=None):
         results = cur.fetchone()
         return results
     except Exception as e:
-        log_error(__name__, sql_query, str(e))
+        if auto_catch:
+            log_error(__name__, sql_query, str(e))
+        else:
+            raise
 
 
-def execute_cursor(sql_query, data=None):
+def execute_cursor(sql_query, data=None, auto_catch=False):
     try:
         conn = get_pg_connection()
         cur = conn.cursor()
@@ -138,10 +142,13 @@ def execute_cursor(sql_query, data=None):
         results = cur.fetchall()
         return results
     except Exception as e:
-        log_error(__name__, sql_query, str(e))
+        if auto_catch:
+            log_error(__name__, sql_query, str(e))
+        else:
+            raise
 
 
-def execute_cursor_function(function_name, data=None):
+def execute_cursor_function(function_name, data=None, auto_catch=False):
     try:
         conn = get_pg_connection()
         cur = conn.cursor()
@@ -150,29 +157,10 @@ def execute_cursor_function(function_name, data=None):
         rows = cur.fetchall()
         return rows
     except Exception as e:
-        log_error(__name__, function_name, str(e))
-
-
-UPSERTERS = dict()
-
-
-def upsert(table, reset=False):
-    global UPSERTERS
-    try:
-        if reset or not table in UPSERTERS:
-            conn = get_pg_connection()
-            cur = conn.cursor()
-            upsert = Upsert(cur, table)
-            UPSERTERS[table] = upsert
+        if auto_catch:
+            log_error(__name__, function_name, str(e))
         else:
-            upsert = UPSERTERS[table]
-            if upsert.cursor.closed != 0 or upsert.cursor.connection.closed != 0 or upsert is None:
-                return upsert(table, True)
-        assert (isinstance(upsert, Upsert))
-        return upsert
-    except Exception as e:
-        log_error(__name__, table, str(e))
-        return None
+            raise
 
 
 def query_to_file(query, file_name):

@@ -3,7 +3,7 @@ import pandas as pd
 import psycopg2
 import psycopg2.extras
 from logbook import info, trace, error, debug
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool
 from pyscilear.utils import log
@@ -13,7 +13,7 @@ PG_CONNECTION = None
 
 def get_dataframe(sql, index_col=None, coerce_float=True, params=None,
                   parse_dates=None):
-    return pd.read_sql(sql, con=get_sqlalchemy_engine(), index_col=index_col, coerce_float=coerce_float, params=params,
+    return pd.read_sql(text(sql), con=get_sqlalchemy_engine(), index_col=index_col, coerce_float=coerce_float, params=params,
                        parse_dates=parse_dates)
 
 

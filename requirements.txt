@@ -1,6 +1,6 @@
-urllib
 kafka
 pandas
 psycopg2
 logbook
 sqlalchemy
+urllib

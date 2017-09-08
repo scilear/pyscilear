@@ -2,10 +2,18 @@ import json
 
 from kafka import KafkaConsumer, KafkaProducer
 
+PRODUCERS = dict()
+SUBSCRIBERS = dict()
+
 
 def get_publisher():
+    global PRODUCERS
     servers = '192.168.0.10:9092'
-    producer = KafkaProducer(bootstrap_servers=servers)
+    if servers not in PRODUCERS:
+        producer = KafkaProducer(bootstrap_servers=servers)
+        PRODUCERS[servers] = producer
+    else:
+        producer = PRODUCERS[servers]
     return producer
 
 
@@ -17,10 +25,16 @@ def pub(data, topic, auto_flush=True):
 
 
 def get_subscriber(group_id, auto_offset_reset):
+    global SUBSCRIBERS
     servers = '192.168.0.10:9092'
-    consumer = KafkaConsumer(bootstrap_servers=servers,
-                             auto_offset_reset=auto_offset_reset,
-                             group_id=group_id)
+    data = (servers, group_id)
+    if data not in SUBSCRIBERS:
+        consumer = KafkaConsumer(bootstrap_servers=servers,
+                                 auto_offset_reset=auto_offset_reset,
+                                 group_id=group_id)
+        SUBSCRIBERS[data] = consumer
+    else:
+        consumer = SUBSCRIBERS[data]
     return consumer
 
 

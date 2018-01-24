@@ -1,8 +1,10 @@
+# -*- coding: UTF-8 -*-
 import os
 import pandas as pd
 import psycopg2
+import psycopg2.extras
 from logbook import info, trace, error, debug
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool
 from pyscilear.utils import log
@@ -12,7 +14,7 @@ PG_CONNECTION = None
 
 def get_dataframe(sql, index_col=None, coerce_float=True, params=None,
                   parse_dates=None):
-    return pd.read_sql(sql, con=get_sqlalchemy_engine(), index_col=index_col, coerce_float=coerce_float, params=params,
+    return pd.read_sql(text(sql), con=get_sqlalchemy_engine(), index_col=index_col, coerce_float=coerce_float, params=params,
                        parse_dates=parse_dates)
 
 
@@ -94,6 +96,25 @@ def get_pg_connection(db_name=None):
 
 PG_CONNECTION = get_pg_connection()
 
+
+def insert_many(sql_query, data=None, commit_right_after=True, autocommit=True, auto_catch=False):
+    try:
+        conn = get_pg_connection()
+        if autocommit:
+            old_isolation_level = conn.isolation_level
+            conn.set_isolation_level(0)
+        cur = conn.cursor()
+        trace(sql_query)
+        psycopg2.extras.execute_values(cur, sql_query, data, template=None, page_size=100)
+        if autocommit:
+            conn.set_isolation_level(old_isolation_level)
+        if commit_right_after:
+            conn.commit()
+    except Exception as e:
+        if auto_catch:
+            log_error(__name__, sql_query, str(e))
+        else:
+            raise
 
 def execute_query(sql_query, data=None, commit_right_after=True, autocommit=True, auto_catch=False):
     try:

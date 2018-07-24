@@ -1,12 +1,11 @@
 Metadata-Version: 1.1
 Name: pyscilear
-Version: 2017-09-06
+Version: 2018.7.24
 Summary: scilear utilities
 Home-page: https://github.com/scilear/pyscilear.git
 Author: Scilear
 Author-email: scilear@gmail.com
 License: MIT
-Description-Content-Type: UNKNOWN
 Description: UNKNOWN
 Platform: UNKNOWN
 Requires: logbook

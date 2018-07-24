@@ -19,7 +19,7 @@ def get_dataframe(sql, index_col=None, coerce_float=True, params=None,
 
 
 def get_sqlalchemy_engine(db_name=None):
-    db, user, pwd, host = get_db_access(db_name)
+    db, user, pwd, host, port = get_db_access(db_name)
     # 4 options
 
     # 1-
@@ -42,7 +42,7 @@ def get_sqlalchemy_engine(db_name=None):
     # return engine
 
     # 4-
-    return create_engine('postgresql://%s:%s@%s/%s' % (user, pwd, host, db), poolclass=NullPool)
+    return create_engine('postgresql://%s:%s@%s:%s/%s' % (user, pwd, host, port, db), poolclass=NullPool)
 
 
 def get_db_access(db_name=''):
@@ -51,7 +51,8 @@ def get_db_access(db_name=''):
     db_user = os.environ['PGUSER']
     db_password = os.environ['PGPASSWORD']
     db_host = os.environ['PGHOST']
-    return db_name, db_user, db_password, db_host
+    db_port = os.environ['PGPORT']
+    return db_name, db_user, db_password, db_host, db_port
 
 
 def log_error(function_name, what, exception_str):
@@ -85,8 +86,8 @@ def get_pg_connection(db_name=None):
     if PG_CONNECTION is not None and PG_CONNECTION.closed == 0:
         return PG_CONNECTION
 
-    db, user, pwd, host = get_db_access(db_name=db_name)
-    conn_string = "dbname='%s' port='5432' user='%s' password='%s' host='%s'" % (db, user, pwd, host)
+    db, user, pwd, host, port = get_db_access(db_name=db_name)
+    conn_string = "dbname='%s' port='%s' user='%s' password='%s' host='%s'" % (db, port, user, pwd, host)
     trace(conn_string)
     log('creating new connection', debug)
     PG_CONNECTION = psycopg2.connect(conn_string)
